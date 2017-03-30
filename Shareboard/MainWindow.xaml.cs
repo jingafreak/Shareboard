@@ -1,90 +1,113 @@
 ﻿using MahApps.Metro.Controls;
-using System.Linq;
+using System;
+using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shapes;
 
 namespace Shareboard
 {
 	public partial class MainWindow : MetroWindow
 	{
+		#region Attributes
 
-		private System.Windows.Point _startPos;
-		private Path _currentPath;
+		private Whiteboard Whiteboard;
+
+		#endregion
+
+		#region Constructors
 
 		public MainWindow()
 		{
 			InitializeComponent();
-		}
-
-		#region Painting Mouse Events
-		
-		private void Paint(object sender, MouseEventArgs e)
-		{
-			if (e.LeftButton == MouseButtonState.Pressed)
-			{
-				if (_currentPath == null)
-				{
-					return;
-				}
-
-				PolyLineSegment pls =
-					(PolyLineSegment)((PathGeometry)_currentPath.Data).Figures.Last().Segments.Last();
-				pls.Points.Add(e.GetPosition(whiteboard));
-			}
-		}
-		
-		private void BeginPaint(object sender, MouseButtonEventArgs e)
-		{
-			if (e.ButtonState == MouseButtonState.Pressed)
-			{
-				_startPos = e.GetPosition(whiteboard);
-
-
-				_currentPath = new Path
-				{
-					Data = new PathGeometry
-					{
-						Figures = {
-							new PathFigure {
-								StartPoint = _startPos,
-								Segments = {new PolyLineSegment()}
-							}
-						}
-					},
-					Stroke = new SolidColorBrush(Colors.Red),
-					StrokeThickness = 4
-				};
-
-				whiteboard.Children.Add(_currentPath);
-			}
-		}
-		
-		private void StopPaint(object sender, MouseButtonEventArgs e)
-		{
-			_currentPath = null;
-		}
-
-
-		private void CtrlZ()
-		{
-			if (whiteboard.Children.Count > 0)
-			{
-				whiteboard.Children.RemoveAt(whiteboard.Children.Count - 1);
-			}
+			Whiteboard = new Whiteboard(DrawingCanvas, BrushSizeCalc(Sl_BrushThickness.Value));
 		}
 
 		#endregion
 
-		private void whiteboard_KeyDown(object sender, KeyEventArgs e)
+		#region Listeners
+
+		#region MainWindow
+
+		private void MainWindow_KeyDown(object sender, KeyEventArgs e)
 		{
 			switch (e.Key)
 			{
 				case Key.Z:
 					if ((System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Control) == System.Windows.Forms.Keys.Control)
-						CtrlZ();
+						Whiteboard.Undo();
 					break;
 			}
 		}
+
+		#endregion
+
+		#region DrawingCanvas
+
+		private void DrawingCanvas_MouseDown(object sender, MouseButtonEventArgs e)
+		{
+			Whiteboard.BeginPaint(sender, e);
+		}
+
+		private void DrawingCanvas_MouseMove(object sender, MouseEventArgs e)
+		{
+			Whiteboard.Paint(sender, e);
+		}
+
+		private void DrawingCanvas_MouseUp(object sender, MouseButtonEventArgs e)
+		{
+			Whiteboard.StopPaint(sender, e);
+		}
+
+		#endregion
+
+		#region Draw Settings
+
+		private void Btn_Brush_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+
+		}
+
+		private void Btn_Delete_Click(object sender, System.Windows.RoutedEventArgs e)
+		{
+			Whiteboard.Clear();
+		}
+
+		private void Sl_BrushThickness_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
+		{
+			Slider slider = sender as Slider;
+			if (Whiteboard != null)
+			{
+				Whiteboard.BrushThickness = BrushSizeCalc(slider.Value);
+			}
+		}
+		
+		#endregion
+
+		#endregion Listeners
+
+		#region Misc
+
+		private static double BrushSizeCalc(double SliderValue)
+		{
+			switch (SliderValue)
+			{
+				case 1:
+					return 1;
+
+				case 2:
+					return 5;
+
+				case 3:
+					return 10;
+
+				case 4:
+					return 25;
+
+				case 5:
+					return 50;
+			}
+			return 1;
+		}
+
+		#endregion
 	}
 }

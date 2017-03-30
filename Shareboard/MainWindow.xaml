@@ -11,7 +11,12 @@
 					  Height="600"
 					  Width="800"
 					  WindowStartupLocation="CenterScreen"
-					  FontFamily="Montserrat">
+					  FontFamily="Montserrat"
+					  BorderBrush="#EA4333"
+					  BorderThickness="1"
+					  MinWidth="400"
+					  MinHeight="300"
+					  KeyDown="MainWindow_KeyDown">
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -34,25 +39,37 @@
 					HorizontalAlignment="Center"
 					Margin="5">
 
-			<Button Name="btn_brush"
+			<Button Name="Btn_Brush"
 					Width="30"
 					Height="32"
 					Style="{StaticResource MaterialDesignToolForegroundButton}"
 					materialDesign:RippleAssist.IsCentered="True"
 					VerticalAlignment="Bottom"
-					ClipToBounds="True">
+					ClipToBounds="True"
+					Click="Btn_Brush_Click">
 				<materialDesign:PackIcon Kind="Brush" />
 			</Button>
-			<Button Name="btn_delete"
+			<Slider Name="Sl_BrushThickness"
+					Value="2"
+					Minimum="1"
+					Maximum="5"
+					IsSnapToTickEnabled="True"
+					Width="100"
+					VerticalAlignment="Center"
+					ValueChanged="Sl_BrushThickness_ValueChanged" />
+
+			<Button Name="Btn_Delete"
 					Width="30"
 					Height="32"
 					Style="{StaticResource MaterialDesignToolForegroundButton}"
 					materialDesign:RippleAssist.IsCentered="True"
 					VerticalAlignment="Bottom"
-					ClipToBounds="True">
+					ClipToBounds="True"
+					Click="Btn_Delete_Click">
 				<materialDesign:PackIcon Kind="Delete" />
 			</Button>
-			<Button Name="btn_share"
+			
+			<Button Name="Btn_Share"
 					Width="30"
 					Height="32"
 					Style="{StaticResource MaterialDesignToolForegroundButton}"
@@ -67,13 +84,12 @@
 				Margin="5"
 				BorderBrush="Black"
 				BorderThickness="1">
-			<Canvas Name="whiteboard"
+			<Canvas Name="DrawingCanvas"
 					Background="White"
-					Focusable="True"
-					MouseDown="BeginPaint"
-					MouseMove="Paint"
-					MouseUp="StopPaint" 
-					KeyDown="whiteboard_KeyDown"
+					ClipToBounds="True"
+					MouseDown="DrawingCanvas_MouseDown"
+					MouseMove="DrawingCanvas_MouseMove"
+					MouseUp="DrawingCanvas_MouseUp"
 					Cursor="Pen"/>
 		</Border>
 	</Grid>
