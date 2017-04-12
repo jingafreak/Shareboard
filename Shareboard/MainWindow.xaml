@@ -34,12 +34,15 @@
 			<TextBox Width="150"></TextBox>
 		</StackPanel>
 		
-		<StackPanel Grid.Row="1"
+		<StackPanel Name="DrawSettings" Grid.Row="1"
 					Orientation="Horizontal"
 					HorizontalAlignment="Center"
 					Margin="5">
 
-			<Button Name="Btn_Brush"
+			<Border Name="Border_Btn_Brush"
+					BorderThickness="0 0 0 3"
+					BorderBrush="Transparent">
+				<Button Name="Btn_Brush"
 					Width="30"
 					Height="32"
 					Style="{StaticResource MaterialDesignToolForegroundButton}"
@@ -47,16 +50,33 @@
 					VerticalAlignment="Bottom"
 					ClipToBounds="True"
 					Click="Btn_Brush_Click">
-				<materialDesign:PackIcon Kind="Brush" />
-			</Button>
-			<Slider Name="Sl_BrushThickness"
+					<materialDesign:PackIcon Kind="Brush" />
+				</Button>
+			</Border>
+
+			<Border Name="Border_Btn_Eraser"
+					BorderThickness="0 0 0 3"
+					BorderBrush="Transparent">
+				<Button Name="Btn_Eraser"
+					Width="30"
+					Height="32"
+					Style="{StaticResource MaterialDesignToolForegroundButton}"
+					materialDesign:RippleAssist.IsCentered="True"
+					VerticalAlignment="Bottom"
+					ClipToBounds="True"
+					Click="Btn_Eraser_Click">
+					<materialDesign:PackIcon Kind="Eraser" />
+				</Button>
+			</Border>
+			
+			<Slider Name="Sl_Thickness"
 					Value="2"
 					Minimum="1"
 					Maximum="5"
 					IsSnapToTickEnabled="True"
 					Width="100"
 					VerticalAlignment="Center"
-					ValueChanged="Sl_BrushThickness_ValueChanged" />
+					ValueChanged="Sl_Thickness_ValueChanged" />
 
 			<Button Name="Btn_Delete"
 					Width="30"
@@ -90,6 +110,8 @@
 					MouseDown="DrawingCanvas_MouseDown"
 					MouseMove="DrawingCanvas_MouseMove"
 					MouseUp="DrawingCanvas_MouseUp"
+					MouseLeave="DrawingCanvas_MouseLeave"
+					MouseEnter="DrawingCanvas_MouseEnter"
 					Cursor="Pen"/>
 		</Border>
 	</Grid>

@@ -1,7 +1,9 @@
 ﻿using MahApps.Metro.Controls;
-using System;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+
+using Brushes = System.Windows.Media.Brushes;
 
 namespace Shareboard
 {
@@ -9,16 +11,19 @@ namespace Shareboard
 	{
 		#region Attributes
 
-		private Whiteboard Whiteboard;
+		private Whiteboard _whiteboard;
 
 		#endregion
-
+		
 		#region Constructors
 
 		public MainWindow()
 		{
 			InitializeComponent();
-			Whiteboard = new Whiteboard(DrawingCanvas, BrushSizeCalc(Sl_BrushThickness.Value));
+
+			_whiteboard = new Whiteboard(DrawingCanvas, BrushSizeCalc(Sl_Thickness.Value));
+
+			ChangeTool(Whiteboard.Tool.Brush);
 		}
 
 		#endregion
@@ -33,7 +38,7 @@ namespace Shareboard
 			{
 				case Key.Z:
 					if ((System.Windows.Forms.Control.ModifierKeys & System.Windows.Forms.Keys.Control) == System.Windows.Forms.Keys.Control)
-						Whiteboard.Undo();
+						_whiteboard.Undo();
 					break;
 			}
 		}
@@ -44,39 +49,102 @@ namespace Shareboard
 
 		private void DrawingCanvas_MouseDown(object sender, MouseButtonEventArgs e)
 		{
-			Whiteboard.BeginPaint(sender, e);
+			switch (_whiteboard.CurrentTool)
+			{
+				case Whiteboard.Tool.Brush:
+					_whiteboard.BeginPaint(sender, e);
+					break;
+
+				case Whiteboard.Tool.Eraser:
+					_whiteboard.BeginErase(sender, e);
+					break;
+			}
 		}
 
 		private void DrawingCanvas_MouseMove(object sender, MouseEventArgs e)
 		{
-			Whiteboard.Paint(sender, e);
+			switch (_whiteboard.CurrentTool)
+			{
+				case Whiteboard.Tool.Brush:
+					_whiteboard.Paint(sender, e);
+					break;
+
+				case Whiteboard.Tool.Eraser:
+					_whiteboard.Erase(sender, e);
+					break;
+			}
 		}
 
 		private void DrawingCanvas_MouseUp(object sender, MouseButtonEventArgs e)
 		{
-			Whiteboard.StopPaint(sender, e);
+			switch (_whiteboard.CurrentTool)
+			{
+				case Whiteboard.Tool.Brush:
+					_whiteboard.StopPaint(sender, e);
+					break;
+
+				case Whiteboard.Tool.Eraser:
+					_whiteboard.StopErase(sender, e);
+					break;
+			}
+		}
+
+		private void DrawingCanvas_MouseLeave(object sender, MouseEventArgs e)
+		{
+			switch (_whiteboard.CurrentTool)
+			{
+				case Whiteboard.Tool.Brush:
+					_whiteboard.StopPaint(sender, null);
+					break;
+
+				case Whiteboard.Tool.Eraser:
+					_whiteboard.StopErase(sender, null);
+					break;
+			}
+		}
+
+		private void DrawingCanvas_MouseEnter(object sender, MouseEventArgs e)
+		{
+			if (e.LeftButton == MouseButtonState.Pressed)
+			{
+				switch (_whiteboard.CurrentTool)
+				{
+					case Whiteboard.Tool.Brush:
+						_whiteboard.BeginPaint(sender, null);
+						break;
+
+					case Whiteboard.Tool.Eraser:
+						_whiteboard.BeginErase(sender, null);
+						break;
+				}
+			}
 		}
 
 		#endregion
 
 		#region Draw Settings
 
-		private void Btn_Brush_Click(object sender, System.Windows.RoutedEventArgs e)
+		private void Btn_Brush_Click(object sender, RoutedEventArgs e)
 		{
-
+			ChangeTool(Whiteboard.Tool.Brush);
 		}
 
-		private void Btn_Delete_Click(object sender, System.Windows.RoutedEventArgs e)
+		private void Btn_Eraser_Click(object sender, RoutedEventArgs e)
 		{
-			Whiteboard.Clear();
+			ChangeTool(Whiteboard.Tool.Eraser);
 		}
 
-		private void Sl_BrushThickness_ValueChanged(object sender, System.Windows.RoutedPropertyChangedEventArgs<double> e)
+		private void Btn_Delete_Click(object sender, RoutedEventArgs e)
+		{
+			_whiteboard.Clear();
+		}
+
+		private void Sl_Thickness_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
 		{
 			Slider slider = sender as Slider;
-			if (Whiteboard != null)
+			if (_whiteboard != null)
 			{
-				Whiteboard.BrushThickness = BrushSizeCalc(slider.Value);
+				_whiteboard.BrushThickness = BrushSizeCalc(slider.Value);
 			}
 		}
 		
@@ -108,6 +176,34 @@ namespace Shareboard
 			return 1;
 		}
 
+		private void ChangeTool(Whiteboard.Tool tool)
+		{
+			_whiteboard.CurrentTool = tool;
+
+			foreach (UIElement control in DrawSettings.Children)
+			{
+				if (control is Border)
+				{
+					Border border = control as Border;
+					border.BorderBrush = Brushes.Transparent;
+				}
+			}
+			switch (tool)
+			{
+				case Whiteboard.Tool.Brush:
+					Border_Btn_Brush.BorderBrush = Brushes.Red;
+					break;
+				case Whiteboard.Tool.Eraser:
+					Border_Btn_Eraser.BorderBrush = Brushes.Red;
+					break;
+				case Whiteboard.Tool.Scissors:
+					//Border_Btn_Brush.BorderBrush = Brushes.Red;
+					break;
+
+			}
+		}
+
 		#endregion
+
 	}
 }
